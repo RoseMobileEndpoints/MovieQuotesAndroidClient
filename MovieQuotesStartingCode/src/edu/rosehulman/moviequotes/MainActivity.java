@@ -1,12 +1,13 @@
 package edu.rosehulman.moviequotes;
 
+import java.io.IOException;
 import java.util.ArrayList;
-
-import com.appspot.boutell_movie_quotes.moviequotes.model.MovieQuote;
 
 import android.app.DialogFragment;
 import android.app.ListActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,14 +21,26 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.appspot.boutell_movie_quotes.moviequotes.Moviequotes;
+import com.appspot.boutell_movie_quotes.moviequotes.Moviequotes.Moviequote;
+import com.appspot.boutell_movie_quotes.moviequotes.model.MovieQuote;
+import com.appspot.boutell_movie_quotes.moviequotes.model.MovieQuoteCollection;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.json.gson.GsonFactory;
+
 public class MainActivity extends ListActivity {
 
 	private static final String MQ = "MQ";
+	private Moviequotes mService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		Moviequotes.Builder builder = new Moviequotes.Builder(AndroidHttp.newCompatibleTransport(),
+				new GsonFactory(), null);
+		mService = builder.build();
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		getListView().setMultiChoiceModeListener(new MyMultiClickListener());
@@ -75,7 +88,8 @@ public class MainActivity extends ListActivity {
 		}
 
 		@Override
-		public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+		public void onItemCheckedStateChanged(ActionMode mode, int position, long id,
+				boolean checked) {
 			MovieQuote item = (MovieQuote) getListAdapter().getItem(position);
 			if (checked) {
 				mQuotesToDelete.add(item);
@@ -115,13 +129,16 @@ public class MainActivity extends ListActivity {
 
 		DialogFragment df = new DialogFragment() {
 			@Override
-			public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			public View onCreateView(LayoutInflater inflater, ViewGroup container,
+					Bundle savedInstanceState) {
 				View view = inflater.inflate(R.layout.dialog_add, container);
 				getDialog().setTitle(getString(R.string.edit_dialog_title));
 				final Button confirmButton = (Button) view.findViewById(R.id.add_dialog_ok);
 				final Button cancelButton = (Button) view.findViewById(R.id.add_dialog_cancel);
-				final EditText movieTitleEditText = (EditText) view.findViewById(R.id.add_dialog_movie_title);
-				final EditText movieQuoteEditText = (EditText) view.findViewById(R.id.add_dialog_movie_quote);
+				final EditText movieTitleEditText = (EditText) view
+						.findViewById(R.id.add_dialog_movie_title);
+				final EditText movieQuoteEditText = (EditText) view
+						.findViewById(R.id.add_dialog_movie_quote);
 
 				// pre-populate
 				movieTitleEditText.setText(currentQuote.getMovie());
@@ -133,8 +150,8 @@ public class MainActivity extends ListActivity {
 						String movieTitleText = movieTitleEditText.getText().toString();
 						String movieQuoteText = movieQuoteEditText.getText().toString();
 						Toast.makeText(MainActivity.this,
-								"Got the title " + movieTitleText + " and quote " + movieQuoteText, Toast.LENGTH_LONG)
-								.show();
+								"Got the title " + movieTitleText + " and quote " + movieQuoteText,
+								Toast.LENGTH_LONG).show();
 						// add the data and send to server
 						currentQuote.setMovie(movieTitleText);
 						currentQuote.setQuote(movieQuoteText);
@@ -164,7 +181,8 @@ public class MainActivity extends ListActivity {
 	}
 
 	private void updateQuotes() {
-		// TODO: Kick off an AsynchTask to do this.
+		// DONE: Kick off an AsynchTask to do this.
+		(new QueryForQuotesTask()).execute(); 
 	}
 
 	@Override
@@ -193,13 +211,16 @@ public class MainActivity extends ListActivity {
 	private void addItem() {
 		DialogFragment df = new DialogFragment() {
 			@Override
-			public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			public View onCreateView(LayoutInflater inflater, ViewGroup container,
+					Bundle savedInstanceState) {
 				View view = inflater.inflate(R.layout.dialog_add, container);
 				getDialog().setTitle("Add a movie and quote");
 				final Button confirmButton = (Button) view.findViewById(R.id.add_dialog_ok);
 				final Button cancelButton = (Button) view.findViewById(R.id.add_dialog_cancel);
-				final EditText movieTitleEditText = (EditText) view.findViewById(R.id.add_dialog_movie_title);
-				final EditText movieQuoteEditText = (EditText) view.findViewById(R.id.add_dialog_movie_quote);
+				final EditText movieTitleEditText = (EditText) view
+						.findViewById(R.id.add_dialog_movie_title);
+				final EditText movieQuoteEditText = (EditText) view
+						.findViewById(R.id.add_dialog_movie_quote);
 
 				confirmButton.setOnClickListener(new OnClickListener() {
 					@Override
@@ -207,8 +228,8 @@ public class MainActivity extends ListActivity {
 						String movieTitleText = movieTitleEditText.getText().toString();
 						String movieQuoteText = movieQuoteEditText.getText().toString();
 						Toast.makeText(MainActivity.this,
-								"Got the title " + movieTitleText + " and quote " + movieQuoteText, Toast.LENGTH_LONG)
-								.show();
+								"Got the title " + movieTitleText + " and quote " + movieQuoteText,
+								Toast.LENGTH_LONG).show();
 						// add the data and send to server
 						MovieQuote movieQuote = new MovieQuote();
 						movieQuote.setMovie(movieTitleText);
@@ -239,5 +260,34 @@ public class MainActivity extends ListActivity {
 	}
 
 	// TODO: Backend communication
+	class QueryForQuotesTask extends AsyncTask<Void, Void, MovieQuoteCollection> {
 
+		@Override
+		protected MovieQuoteCollection doInBackground(Void... params) {
+			MovieQuoteCollection quotes = null;
+			try {
+				Moviequote.List query = mService.moviequote().list();
+				query.setOrder("-last_touch_date_time");
+				// For more than 50 quotes, we need to deal with pageTokens.
+				query.setLimit(50L);
+				quotes = query.execute();
+			} catch (IOException e) {
+				Log.e(MQ, "Failed loading " + e);
+			}
+			return quotes;
+		}
+
+		@Override
+		protected void onPostExecute(MovieQuoteCollection result) {
+			if (result == null) {
+				Log.e(MQ, "Failed loading, result is null");
+				return;
+			}
+
+			MovieQuoteArrayAdapter adapter = new MovieQuoteArrayAdapter(MainActivity.this,
+					android.R.layout.simple_expandable_list_item_2, android.R.id.text1,
+					result.getItems());
+			setListAdapter(adapter);
+		}
+	}
 }

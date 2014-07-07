@@ -57,7 +57,7 @@ public class Moviequotes extends com.google.api.client.googleapis.services.json.
    *
    * @since 1.7
    */
-  public static final String DEFAULT_ROOT_URL = "https://boutell-movie-quotes.appspot.com/_ah/api/";
+  public static final String DEFAULT_ROOT_URL = "https://boutell-movie-quotes-3.appspot.com/_ah/api/";
 
   /**
    * The default encoded service path of the service. This is determined when the library is

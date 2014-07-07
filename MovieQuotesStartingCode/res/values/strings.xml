@@ -11,8 +11,6 @@
     <string name="loading">Loading...</string>
     <string name="movie_title_hint">Enter a movie title</string>
     <string name="movie_quote_hint">Enter a movie quote</string>
-    <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
     <string name="add_dialog_title">Add a movie and quote</string>
     <string name="edit_dialog_title">Update quote</string>
     <string name="context_delete_item_text">Delete</string>

@@ -160,6 +160,7 @@ public class MainActivity extends ListActivity {
 						// ArrayList separately and make adapter a field.
 						((MovieQuoteArrayAdapter) getListAdapter()).notifyDataSetChanged();
 						// TODO: Kick off an AsychTask to insert a quote
+						(new InsertQuoteTask()).execute(currentQuote);
 
 						dismiss();
 
@@ -182,7 +183,7 @@ public class MainActivity extends ListActivity {
 
 	private void updateQuotes() {
 		// DONE: Kick off an AsynchTask to do this.
-		(new QueryForQuotesTask()).execute(); 
+		(new QueryForQuotesTask()).execute();
 	}
 
 	@Override
@@ -241,7 +242,7 @@ public class MainActivity extends ListActivity {
 						// the top on the backend. Could store ArrayList
 						// separately and make adapter a field.
 						// TODO: insert a movie on the server
-
+						(new InsertQuoteTask()).execute(movieQuote);
 						dismiss();
 					}
 				});
@@ -288,6 +289,31 @@ public class MainActivity extends ListActivity {
 					android.R.layout.simple_expandable_list_item_2, android.R.id.text1,
 					result.getItems());
 			setListAdapter(adapter);
+		}
+	}
+
+	class InsertQuoteTask extends AsyncTask<MovieQuote, Void, MovieQuote> {
+
+		@Override
+		protected MovieQuote doInBackground(MovieQuote... quotes) {
+			MovieQuote returnedQuote = null;
+			try {
+				returnedQuote = mService.moviequote().insert(quotes[0]).execute();
+			} catch (IOException e) {
+				Log.e(MQ, "Failed inserting " + e);
+			}
+			return returnedQuote;
+		}
+
+		@Override
+		protected void onPostExecute(MovieQuote result) {
+			super.onPostExecute(result);
+			if (result == null) {
+				Log.e(MQ, "Failed inserting, result is null");
+				return;
+			}
+
+			updateQuotes();
 		}
 	}
 }

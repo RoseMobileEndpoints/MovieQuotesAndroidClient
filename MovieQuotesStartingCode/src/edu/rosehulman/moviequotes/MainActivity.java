@@ -45,24 +45,24 @@ public class MainActivity extends ListActivity {
 		getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		getListView().setMultiChoiceModeListener(new MyMultiClickListener());
 
-		ArrayList<MovieQuote> testQuotes = new ArrayList<MovieQuote>();
-		MovieQuote quote1 = new MovieQuote();
-		quote1.setMovie("Title1");
-		quote1.setQuote("Quote1");
-		testQuotes.add(quote1);
-		MovieQuote quote2 = new MovieQuote();
-		quote2.setMovie("Title2");
-		quote2.setQuote("Quote2");
-		testQuotes.add(quote2);
-		MovieQuote quote3 = new MovieQuote();
-		quote3.setMovie("Title3");
-		quote3.setQuote("Quote3");
-		testQuotes.add(quote3);
-
-		MovieQuoteArrayAdapter adapter = new MovieQuoteArrayAdapter(this,
-				android.R.layout.simple_expandable_list_item_2, android.R.id.text1, testQuotes);
-		setListAdapter(adapter);
-
+//		ArrayList<MovieQuote> testQuotes = new ArrayList<MovieQuote>();
+//		MovieQuote quote1 = new MovieQuote();
+//		quote1.setMovie("Title1");
+//		quote1.setQuote("Quote1");
+//		testQuotes.add(quote1);
+//		MovieQuote quote2 = new MovieQuote();
+//		quote2.setMovie("Title2");
+//		quote2.setQuote("Quote2");
+//		testQuotes.add(quote2);
+//		MovieQuote quote3 = new MovieQuote();
+//		quote3.setMovie("Title3");
+//		quote3.setQuote("Quote3");
+//		testQuotes.add(quote3);
+//
+//		MovieQuoteArrayAdapter adapter = new MovieQuoteArrayAdapter(this,
+//				android.R.layout.simple_expandable_list_item_2, android.R.id.text1, testQuotes);
+//		setListAdapter(adapter);
+		updateQuotes();
 	}
 
 	private class MyMultiClickListener implements MultiChoiceModeListener {
@@ -114,7 +114,7 @@ public class MainActivity extends ListActivity {
 			for (MovieQuote quote : mQuotesToDelete) {
 				((MovieQuoteArrayAdapter) getListAdapter()).remove(quote);
 				// TODO: Implement deletion on server.
-
+				new DeleteQuoteTask().execute(quote.getEntityKey());
 			}
 			((MovieQuoteArrayAdapter) getListAdapter()).notifyDataSetChanged();
 			updateQuotes();
@@ -316,4 +316,33 @@ public class MainActivity extends ListActivity {
 			updateQuotes();
 		}
 	}
+	
+	class DeleteQuoteTask extends AsyncTask<String, Void, MovieQuote> {
+
+		@Override
+		protected MovieQuote doInBackground(String... entityKeys) {
+			MovieQuote returnedQuote = null;
+			try {
+				returnedQuote = mService.moviequote().delete(entityKeys[0]).execute();
+			} catch (IOException e) {
+				Log.e(MQ, "Failed deleting " + e);
+			}
+			return returnedQuote;
+		}
+		
+		@Override
+		protected void onPostExecute(MovieQuote result) {
+			super.onPostExecute(result);
+			if (result == null) {
+				Log.e(MQ, "Failed deleting, result is null");
+				return;
+			}
+			updateQuotes();
+		}
+		
+	}
+	
+	
+	
+	
 }

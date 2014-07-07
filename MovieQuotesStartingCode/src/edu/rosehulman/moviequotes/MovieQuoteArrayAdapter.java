@@ -18,7 +18,7 @@ public class MovieQuoteArrayAdapter extends ArrayAdapter<MovieQuote> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = super.getView(position, convertView, parent);
 		TextView titleTextView = (TextView) view.findViewById(android.R.id.text2);
-		titleTextView.setText(getItem(position).getTitle());
+		titleTextView.setText(getItem(position).getMovie());
 		TextView quoteTextView = (TextView) view.findViewById(android.R.id.text1);
 		quoteTextView.setText(getItem(position).getQuote());
 		return view;

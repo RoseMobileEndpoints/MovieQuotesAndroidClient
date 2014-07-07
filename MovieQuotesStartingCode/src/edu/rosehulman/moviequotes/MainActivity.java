@@ -32,15 +32,15 @@ public class MainActivity extends ListActivity {
 
 		ArrayList<MovieQuote> testQuotes = new ArrayList<MovieQuote>();
 		MovieQuote quote1 = new MovieQuote();
-		quote1.setTitle("Title1");
+		quote1.setMovie("Title1");
 		quote1.setQuote("Quote1");
 		testQuotes.add(quote1);
 		MovieQuote quote2 = new MovieQuote();
-		quote2.setTitle("Title2");
+		quote2.setMovie("Title2");
 		quote2.setQuote("Quote2");
 		testQuotes.add(quote2);
 		MovieQuote quote3 = new MovieQuote();
-		quote3.setTitle("Title3");
+		quote3.setMovie("Title3");
 		quote3.setQuote("Quote3");
 		testQuotes.add(quote3);
 
@@ -122,7 +122,7 @@ public class MainActivity extends ListActivity {
 				final EditText movieQuoteEditText = (EditText) view.findViewById(R.id.add_dialog_movie_quote);
 
 				// pre-populate
-				movieTitleEditText.setText(currentQuote.getTitle());
+				movieTitleEditText.setText(currentQuote.getMovie());
 				movieQuoteEditText.setText(currentQuote.getQuote());
 
 				confirmButton.setOnClickListener(new OnClickListener() {
@@ -134,7 +134,7 @@ public class MainActivity extends ListActivity {
 								"Got the title " + movieTitleText + " and quote " + movieQuoteText, Toast.LENGTH_LONG)
 								.show();
 						// add the data and send to server
-						currentQuote.setTitle(movieTitleText);
+						currentQuote.setMovie(movieTitleText);
 						currentQuote.setQuote(movieQuoteText);
 						// CONSIDER: Appears at the bottom initially, but
 						// inserts to the top on the backend. Could store
@@ -209,7 +209,7 @@ public class MainActivity extends ListActivity {
 								.show();
 						// add the data and send to server
 						MovieQuote movieQuote = new MovieQuote();
-						movieQuote.setTitle(movieTitleText);
+						movieQuote.setMovie(movieTitleText);
 						movieQuote.setQuote(movieQuoteText);
 						((MovieQuoteArrayAdapter) getListAdapter()).add(movieQuote);
 						((MovieQuoteArrayAdapter) getListAdapter()).notifyDataSetChanged();

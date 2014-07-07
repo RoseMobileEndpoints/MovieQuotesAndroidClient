@@ -2,6 +2,8 @@ package edu.rosehulman.moviequotes;
 
 import java.util.ArrayList;
 
+import com.appspot.boutell_movie_quotes.moviequotes.model.MovieQuote;
+
 import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.os.Bundle;

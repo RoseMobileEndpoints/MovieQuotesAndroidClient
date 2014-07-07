@@ -242,7 +242,7 @@ public class MainActivity extends ListActivity {
 						// the top on the backend. Could store ArrayList
 						// separately and make adapter a field.
 						// TODO: insert a movie on the server
-						(new InsertQuoteTask()).execute(movieQuote);
+						(new InsertQuoteTask()).execute(currentQuote);
 						dismiss();
 					}
 				});
